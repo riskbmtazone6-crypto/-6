@@ -1,0 +1,6 @@
+{
+  "name": "BMTA Case Management System",
+  "description": "Comprehensive case management and complaint tracking system for Bangkok Mass Transit Authority (ขสมก.) with SLA monitoring, investigation workflows, Google Sheets/Drive integration, and Firestore persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "Case": {
+      "title": "Case",
+      "description": "A complaint or case submitted to BMTA Case Management System",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique Case ID (e.g. CR-2026-00124)" },
+        "subject": { "type": "string", "description": "Short summary of complaint", "maxLength": 200 },
+        "category": { "type": "string", "description": "Category (driver_conduct, schedule_delay, vehicle_condition, ticketing_issue, route_change, other)" },
+        "channel": { "type": "string", "description": "Originating channel (hotline, website, social_media, in_person)" },
+        "priority": { "type": "string", "description": "Priority level (low, medium, high)" },
+        "status": { "type": "string", "description": "Current case status (new, investigating, pending_approval, completed, overdue)" },
+        "complainantName": { "type": "string", "description": "Name of complainant", "maxLength": 100 },
+        "complainantContact": { "type": "string", "description": "Phone number of complainant", "maxLength": 50 },
+        "complainantEmail": { "type": "string", "description": "Email of complainant", "maxLength": 100 },
+        "isAnonymous": { "type": "boolean", "description": "Whether complainant requested anonymity" },
+        "busRoute": { "type": "string", "description": "Bus line / route (e.g. 514, 511, 72)", "maxLength": 50 },
+        "vehicleId": { "type": "string", "description": "Vehicle plate or identifier", "maxLength": 50 },
+        "incidentTime": { "type": "string", "description": "Date and time of the incident" },
+        "incidentLocation": { "type": "string", "description": "Location of incident", "maxLength": 200 },
+        "narrative": { "type": "string", "description": "Detailed description of the incident", "maxLength": 2000 },
+        "assignedInvestigator": { "type": "string", "description": "Name of assigned lead investigator", "maxLength": 100 },
+        "assignedManager": { "type": "string", "description": "Name of supervising zone manager", "maxLength": 100 },
+        "zone": { "type": "string", "description": "BMTA operating zone (e.g. Zone 4, Zone 6)" },
+        "tags": { "type": "array", "description": "List of categorization hashtags" },
+        "slaDeadline": { "type": "string", "description": "Target completion ISO timestamp" },
+        "createdAt": { "type": "string", "description": "ISO timestamp when logged" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp when last updated" },
+        "managerNotes": { "type": "string", "description": "Approval or revision comments by manager", "maxLength": 1000 },
+        "approvalStatus": { "type": "string", "description": "Approval status (pending, approved, revised)" }
+      },
+      "required": ["id", "subject", "category", "channel", "priority", "status", "createdAt"]
+    },
+    "Evidence": {
+      "title": "Evidence",
+      "description": "Evidence file attached to a case",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Evidence item ID" },
+        "caseId": { "type": "string", "description": "Parent Case ID" },
+        "fileName": { "type": "string", "description": "File name" },
+        "fileType": { "type": "string", "description": "video, image, document, audio" },
+        "fileUrl": { "type": "string", "description": "URL or Drive Link" },
+        "driveFileId": { "type": "string", "description": "Google Drive File ID if uploaded to Drive" },
+        "fileSize": { "type": "string", "description": "Human readable file size" },
+        "uploadedAt": { "type": "string", "description": "Upload timestamp" },
+        "uploadedBy": { "type": "string", "description": "Uploader name" }
+      },
+      "required": ["id", "caseId", "fileName", "fileType", "uploadedAt"]
+    },
+    "TimelineEvent": {
+      "title": "TimelineEvent",
+      "description": "Activity history log for a case",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Event ID" },
+        "caseId": { "type": "string", "description": "Parent Case ID" },
+        "title": { "type": "string", "description": "Event title" },
+        "description": { "type": "string", "description": "Detailed log or finding" },
+        "type": { "type": "string", "description": "created, investigation, evidence_added, status_change, manager_action" },
+        "timestamp": { "type": "string", "description": "Timestamp of action" },
+        "author": { "type": "string", "description": "Person who performed action" }
+      },
+      "required": ["id", "caseId", "title", "timestamp", "author"]
+    }
+  },
+  "firestore": {
+    "/cases/{caseId}": {
+      "schema": { "$ref": "Case" },
+      "description": "Complaints collection"
+    },
+    "/cases/{caseId}/evidence/{evidenceId}": {
+      "schema": { "$ref": "Evidence" },
+      "description": "Evidence subcollection"
+    },
+    "/cases/{caseId}/timeline/{eventId}": {
+      "schema": { "$ref": "TimelineEvent" },
+      "description": "Timeline subcollection"
+    }
+  }
+}

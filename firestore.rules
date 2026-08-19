@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global deny-by-default fallback
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidCase(data) {
+      return data.id is string && data.id.size() <= 64
+        && data.subject is string && data.subject.size() > 0 && data.subject.size() <= 500
+        && data.category is string && data.category.size() <= 50
+        && data.channel is string && data.channel.size() <= 50
+        && data.priority is string && data.priority.size() <= 20
+        && data.status is string && data.status.size() <= 30;
+    }
+
+    // Cases collection rules
+    match /cases/{caseId} {
+      allow read: if isSignedIn();
+      
+      allow create: if isSignedIn() 
+        && isValidId(caseId) 
+        && isValidCase(incoming());
+
+      allow update: if isSignedIn() 
+        && isValidId(caseId) 
+        && isValidCase(incoming());
+
+      allow delete: if isSignedIn() && isValidId(caseId);
+
+      // Evidence subcollection
+      match /evidence/{evidenceId} {
+        allow read: if isSignedIn();
+        allow create, update: if isSignedIn() 
+          && isValidId(evidenceId)
+          && incoming().fileName is string
+          && incoming().fileName.size() <= 255;
+        allow delete: if isSignedIn() && isValidId(evidenceId);
+      }
+
+      // Timeline subcollection
+      match /timeline/{eventId} {
+        allow read: if isSignedIn();
+        allow create, update: if isSignedIn() 
+          && isValidId(eventId)
+          && incoming().title is string
+          && incoming().title.size() <= 255;
+        allow delete: if isSignedIn() && isValidId(eventId);
+      }
+    }
+
+    // Test connection document
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+  }
+}
